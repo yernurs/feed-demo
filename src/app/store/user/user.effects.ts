@@ -16,6 +16,7 @@ import { User } from './user.models';
 import * as fromActions from './user.actions';
 
 import { NotificationService } from '@app/services';
+import {Job, JobApplication} from '@app/models/backend';
 
 type Action = fromActions.All;
 
@@ -28,7 +29,24 @@ export class UserEffects {
         private router: Router,
         private notification: NotificationService
     ) { }
-
+    @Effect()
+    apply: Observable<Action> = this.actions.pipe(
+        ofType(fromActions.Types.APPLY),
+        map((action: fromActions.Apply) => action),
+        withLatestFrom(this.afAuth.authState.pipe(take(1))),
+        map(([action, state]) => ({
+            jid: action.job.id,
+            uid_e: state.uid,
+            uid_r: action.job.uid,
+            created: firestore.FieldValue.serverTimestamp()
+        })),
+        switchMap( jobApplication => from(this.afs.collection('job-applications')
+            .doc<JobApplication>(`${jobApplication.jid}`)
+            .set({...jobApplication}, {merge: true})).pipe(
+                map(() => new fromActions.ApplySuccess()),
+                catchError(err => of(new fromActions.ApplyFailure(err.message)))
+        ))
+    );
     @Effect()
     init: Observable<Action> = this.actions.pipe(
         ofType(fromActions.Types.INIT),

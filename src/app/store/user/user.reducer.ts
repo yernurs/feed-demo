@@ -17,7 +17,18 @@ const initialState: UserState = {
 
 export function reducer(state = initialState, action: fromActions.All): UserState {
     switch (action.type) {
+        // apply
+        case fromActions.Types.APPLY: {
+            return { ...state, loading: true };
+        }
 
+        case fromActions.Types.APPLY_SUCCESS: {
+            return { ...state, loading: false, error: null };
+        }
+
+        case fromActions.Types.APPLY_FAILURE: {
+            return { ...state, error: action.error, loading: false};
+        }
         // Init
 
         case fromActions.Types.INIT: {

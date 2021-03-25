@@ -13,10 +13,11 @@ import { FormModule } from './components/form/form.module';
 import { JobsRoutingModule } from './jobs-routing.module';
 import { JobsComponent } from './jobs.component';
 import { JobComponent } from './components/job/job.component';
+import { MyApplicationComponent } from './components/my-application/my-application.component';
 
 
 @NgModule({
-    declarations: [JobsComponent, JobComponent],
+    declarations: [JobsComponent, JobComponent, MyApplicationComponent],
     imports: [
         CommonModule,
         StoreModule.forFeature('jobs', reducers),

@@ -5,13 +5,14 @@ import { firestore } from 'firebase/app';
 import { AngularFirestore } from '@angular/fire/firestore';
 
 import { Observable, from, of } from 'rxjs';
-import { map, switchMap, catchError, take } from 'rxjs/operators';
+import {map, switchMap, catchError, take, withLatestFrom, tap} from 'rxjs/operators';
 
 import { extractDocumentChangeActionData } from '@app/shared/utils/data';
 
 import { Job, JobCreateRequest } from './list.models';
 
 import * as fromActions from './list.actions';
+import {AngularFireAuth} from '@angular/fire/auth';
 
 type Action = fromActions.All;
 
@@ -20,7 +21,8 @@ export class ListEffects {
 
     constructor(
         private actions: Actions,
-        private afs: AngularFirestore
+        private afs: AngularFirestore,
+        private afAuth: AngularFireAuth
     ) { }
 
     @Effect()
@@ -40,14 +42,18 @@ export class ListEffects {
     create: Observable<Action> = this.actions.pipe(
         ofType(fromActions.Types.CREATE),
         map((action: fromActions.Create) => action.job),
-        map((job: JobCreateRequest) => ({
+        withLatestFrom(this.afAuth.authState.pipe(take(1))),
+        map(([job, state]) => ({
             ...job,
+            uid: state.uid,
             created: firestore.FieldValue.serverTimestamp()
         })),
         switchMap((request: JobCreateRequest) =>
             from(this.afs.collection('jobs').add(request)).pipe(
                 map(res => ({ ...request, id: res.id })),
-                map((job: Job) => new fromActions.CreateSuccess(job)),
+                map((job: Job) => {
+                    return new fromActions.CreateSuccess(job);
+                }),
                 catchError(err => of(new fromActions.CreateError(err.message)))
             )
         )

@@ -1,7 +1,12 @@
-import { Action } from '@ngrx/store';
+import {Action, createAction, props} from '@ngrx/store';
 import { User, EmailPasswordCredentials, UserCreateRequest } from './user.models';
+import {Job} from '@app/pages/jobs/store/list/list.models';
 
 export enum Types {
+    APPLY = '[User] apply for job: Start',
+    APPLY_SUCCESS = '[User] apply for job: Success',
+    APPLY_FAILURE = '[User] apply for job: Failure',
+
     INIT = '[User] Init: Start',
     INIT_AUTHORIZED = '[User] Init: Authorized',
     INIT_UNAUTHORIZED = '[User] Init: Unauthorized',
@@ -47,6 +52,21 @@ export class InitUnauthorized implements Action {
 
 export class InitError implements Action {
     readonly type = Types.INIT_ERROR;
+    constructor(public error: string) { }
+}
+// apply
+export class Apply implements Action {
+    readonly type = Types.APPLY;
+    constructor(public job: Job) { }
+}
+
+export class ApplySuccess implements Action {
+    readonly type = Types.APPLY_SUCCESS;
+    constructor() { }
+}
+
+export class ApplyFailure implements Action {
+    readonly type = Types.APPLY_FAILURE;
     constructor(public error: string) { }
 }
 
@@ -156,4 +176,7 @@ export type All
     | CreateError
     | Update
     | UpdateSuccess
-    | UpdateError;
+    | UpdateError
+    | Apply
+    | ApplySuccess
+    | ApplyFailure;

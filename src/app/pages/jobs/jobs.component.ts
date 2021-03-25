@@ -34,7 +34,7 @@ export class JobsComponent implements OnInit {
         this.jobs$ = this.store.pipe(select(fromList.selectAll));
         this.isEditable$ = this.store.pipe(
             select(fromUser.getRoleId),
-            map(roleId => ['recruiter', 'employee'].includes(roleId))
+            map(roleId => ['recruiter'].includes(roleId))
         );
 
         this.store.dispatch(new fromList.Read());
